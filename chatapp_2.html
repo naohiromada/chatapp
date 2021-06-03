@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <title>chatApp</title>
+    <style>
+        #output li {
+            background: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="top">
+        <div>
+            <h1>
+                <a href="#"><img src="img/yoko_logo_b.jpg" alt="会社ロゴ" width="150" height="48" class="Title"> 　　　　　　居住支援法人　お問合せ管理システム
+                </a>
+            </h1>
+        </div>
+
+        <div>
+            <ul class="menu_box">
+                <li class="menu_box_list"><a href="#top">TOP</a></li>
+                <li class="menu_box_list"><a href="#data_Registration">REGISTRATION</a></li>
+                <li class="menu_box_list"><a href="chatapp.html" target="_blank">CHAT</a></li>
+            </ul>
+
+        </div>
+
+        <!--    メイン     -->
+        <main>
+
+            <img src="img/共生イメージ.png" alt="共生イメージ" width="968" height="300">
+    </section>
+    <!--   
+                問い合わせデータ登録画面
+        -->
+    <section id="data_Registration">
+        <ul>
+            <li><label for="No">問い合わせ番号</label><input type="text" id="No"></li>
+            <li>
+                <label for="Surname">姓</label><input type="text" id="Surname">
+                <label for="Name">名</label><input type="text" id="Name">
+            </li>
+            <li><label for="Furigana">フリガナ</label><input type="text" id="Furigana"></li>
+            <li><label for="Postal_code">〒</label><input type="text" id="Postal_code"></li>
+            <li>
+                <label for="Prefectures">都道府県</label><input type="text" id="Prefectures">
+                <label for="City_county">市郡</label><input type="text" id="City_county">
+                <label for="Town_village_address">町村番地</label><input type="text" id="Town_village_address">
+                <label for="Condominium_name">マンション名</label><input type="text" id="Condominium_name">
+            </li>
+            <li>
+                <label for="Home_contact">自宅連絡先</label><input type="text" id="Home_contact">
+                <label for="Cellphone_number">携帯番号</label><input type="text" id="Cellphone_number">
+                <label for="FAX_number">ＦＡＸ番号</label><input type="text" id="FAX_number">
+            </li>
+            <li><label for="mail_address">メールアドレス</label><input type="mail" id="mail_address"></li>
+            <li>
+                <label for="Description">説明</label>
+                <textarea name="" id="text" cols="60" rows="10"></textarea>
+            </li>
+            <li>
+                <button id="send">登録</button>
+            </li>
+        </ul>
+    </section>
+
+    <!-- データ出力場所 -->
+    <ul id="output"></ul>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- 以下にfirebaseのコードを貼り付けよう -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-analytics.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyDBz1_S9z30IgXZPQX5BoAGZ1nUHi2r81Q",
+            authDomain: "housing-support-e8072.firebaseapp.com",
+            projectId: "housing-support-e8072",
+            storageBucket: "housing-support-e8072.appspot.com",
+            messagingSenderId: "988241924990",
+            appId: "1:988241924990:web:9302883cfd67b3c0f9992f",
+            measurementId: "G-ZBDLG0MMT1"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+    </script>
+
+    <script>
+        // 日時をいい感じの形式にする関数
+        function convertFromFirestoreTimestampToDatetime(timestamp) {
+            const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+            const Y = _d.getFullYear();
+            const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+            const d = _d.getDate().toString().padStart(2, '0');
+            const H = _d.getHours().toString().padStart(2, '0');
+            const i = _d.getMinutes().toString().padStart(2, '0');
+            const s = _d.getSeconds().toString().padStart(2, '0');
+            return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+        }
+        // 送信処理の記述
+        $('#send').on('click', function() {
+            const data = {
+                time: firebase.firestore.FieldValue.serverTimestamp(),
+                No: $('#No').val(), //  問い合わせ番号の入力値
+                Surname: $('#Surname').val(), // 姓の入力値
+                Name: $('#Name').val(), // 名の入力値                
+                Furigana: $('#Furigana').val(), // ふりがなの入力値    
+                Postal_code: $('#Postal_code').val(), // 〒の入力値 
+                Prefectures: $('#Prefectures').val(), // 都道府県の入力値 
+                City_county: $('#City_county').val(), // 市郡の入力値 
+                Town_village_address: $('#Town_village_address').val(), // 町村番地の入力値 
+                Condominium_name: $('#Condominium_name').val(), // マンション名の入力値 
+                Home_contact: $('#Home_contact').val(), // 自宅連絡先の入力値 
+                Cellphone_number: $('#Cellphone_number').val(), // 携帯番号の入力値 
+                FAX_number: $('#FAX_number').val(), // ＦＡＸ番号の入力値 
+                mail_address: $('#mail_address').val(), // メールアドレスの入力値 
+                text: $('#text').val(), // 説明文の入力値 
+            };
+
+            console.log(data);
+            db.add(data);
+            $('#text').val('');
+        });
+
+        // 受信処理の記述
+        db.orderBy('time', 'desc').onSnapshot(function(querySnapshot) {
+            // onSnapshotでcloud firestoreのデータ変更時に実行される！
+            console.log(querySnapshot.docs);
+            // querySnapshot.docsにcloud firestoreのデータが配列形式で入る
+            const dataArray = []; // 必要なデータだけが入った新しい配列を作成
+            querySnapshot.docs.forEach(function(doc) {
+                const data = {
+                    id: doc.id,
+                    data: doc.data(),
+                }
+                dataArray.push(data);
+            });
+            // 次ページへ続く...（dataArrayをconsoleで確認！）
+            // ...前ページの続き 「`」で囲んでタグ文字列を表現．「${}」で変数を埋め込み
+            // `dataArray`は前回出てきたオブジェクトの配列
+            const tagArray = [];
+            dataArray.forEach(function(data) {
+                tagArray.push(`
+                <li id=${data.id}>
+                  <p>${convertFromFirestoreTimestampToDatetime(data.data.time)}</p>
+                  <p>${data.data.No}</p>
+                  <p>${data.data.Surname}</p>
+                  <p>${data.data.Name}</p>
+                  <p>${data.data.Furigana}</p>
+                  <p>${data.data.Prefectures}</p>
+                  <p>${data.data.City_county}</p>
+                  <p>${data.data.Town_village_address}</p>
+                  <p>${data.data.Condominium_name}</p>
+                  <p>${data.data.Home_contact}</p>
+                  <p>${data.data.Cellphone_number}</p>
+                  <p>${data.data.FAX_number}</p>
+                  <p>${data.data.mail_address}</p>
+                  <p>${data.data.text}</p>
+                </li>
+                `)
+            })
+            $('#output').html(tagArray);
+        });
+    </script>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="css/sample.css" />
+    <title>chatApp</title>
+    <style>
+        #output li {
+            background: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>スタッフ　チャット</h1>
+    <!-- 入力場所を作成しよう -->
+    <ul>
+        <li>
+            <label for="name">入力者</label>
+            <input type="text" id="name">
+        </li>
+        <li>
+            <textarea name="" id="text" cols="100" rows="10"></textarea>
+        </li>
+        <li>
+            <button id="send">送信</button>
+        </li>
+    </ul>
+
+    <!-- データ出力場所 -->
+    <ul id="output"></ul>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- 以下にfirebaseのコードを貼り付けよう -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-analytics.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyD8P4ak0H44euVeh2MYIJrkF53QS0FwcBw",
+            authDomain: "chat-app-40abe.firebaseapp.com",
+            projectId: "chat-app-40abe",
+            storageBucket: "chat-app-40abe.appspot.com",
+            messagingSenderId: "329171638345",
+            appId: "1:329171638345:web:b8b90075404e08827f0798",
+            measurementId: "G-1CYK125X7B"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+        const db = firebase.firestore().collection('chat');
+    </script>
+
+    <script>
+        // 日時をいい感じの形式にする関数
+        function convertFromFirestoreTimestampToDatetime(timestamp) {
+            const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+            const Y = _d.getFullYear();
+            const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+            const d = _d.getDate().toString().padStart(2, '0');
+            const H = _d.getHours().toString().padStart(2, '0');
+            const i = _d.getMinutes().toString().padStart(2, '0');
+            const s = _d.getSeconds().toString().padStart(2, '0');
+            return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+        }
+        // 送信処理の記述
+        $('#send').on('click', function() {
+            const data = {
+                name: $('#name').val(), // inputの入力値
+                text: $('#text').val(), // textareaの入力値
+                time: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+
+            console.log(data);
+            db.add(data);
+            $('#text').val('');
+        });
+
+        // 受信処理の記述
+        db.orderBy('time', 'desc').onSnapshot(function(querySnapshot) {
+            // onSnapshotでcloud firestoreのデータ変更時に実行される！
+            console.log(querySnapshot.docs);
+            // querySnapshot.docsにcloud firestoreのデータが配列形式で入る
+            const dataArray = []; // 必要なデータだけが入った新しい配列を作成
+            querySnapshot.docs.forEach(function(doc) {
+                const data = {
+                    id: doc.id,
+                    data: doc.data(),
+                }
+                dataArray.push(data);
+            });
+            // 次ページへ続く...（dataArrayをconsoleで確認！）
+            // ...前ページの続き 「`」で囲んでタグ文字列を表現．「${}」で変数を埋め込み
+            // `dataArray`は前回出てきたオブジェクトの配列
+            const tagArray = [];
+            dataArray.forEach(function(data) {
+
+                tagArray.push(`
+                <p>${data.data.name}</p>
+                <li id=${data.id}>
+                  <p>${data.data.text}</p>
+                  <p>${convertFromFirestoreTimestampToDatetime(data.data.time)}</p>
+                </li>
+                `)
+            })
+            $('#output').html(tagArray);
+        });
+    </script>
+</body>
+
+</html>

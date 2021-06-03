@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    /* font-size: 28px; */
+}
+
+.Title {
+    padding: 0;
+    font-size: 20px;
+    text-align: center;
+    vertical-align: -6px;
+}
+
+.menu_box {
+    margin: 0%;
+    font-size: 20px;
+    text-align: center;
+    display: table;
+    justify-content: space-around;
+    table-layout: fixed;
+    width: 75%;
+}
+
+.menu_box_list {
+    list-style-type: none;
+    border: 1px solid #666;
+    background-color: #FFF;
+    display: table-cell;
+    /* 定義 */
+    cursor: pointer;
+}
+
+.menu_box_list:hover {
+    background: #bababb;
+    /* color: rgb(158, 156, 156); */
+}
+
+ul {
+    list-style: none;
+}
